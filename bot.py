@@ -1,10 +1,14 @@
+import os, sys, requests, datetime, re
+try:
+	import telethon
+except:
+	os.system("pip install telethon")
 from telethon import TelegramClient, sync
 from telethon.tl.functions.channels import *
 from telethon.tl.functions.messages import GetBotCallbackAnswerRequest
-from telethon.errors import FloodWaitError, PhoneCodeInvalidError, BotResponseTimeoutError
-from telethon.errors.rpcerrorlist import UsersTooMuchError
+from telethon.errors import PhoneCodeInvalidError, BotResponseTimeoutError
+from telethon.errors.rpcerrorlist import UsersTooMuchError, FloodWaitError
 from time import sleep
-import os, sys, requests, datetime, re
 from requests.exceptions import ConnectionError
 
 if not os.path.exists("session"):
@@ -35,9 +39,9 @@ def menu():
     if a == '4':
         print(f"{g}{bold}Bye Bye, See you again Thanks for using this bot :), Good luck{reset}")
         quit()
-    return a
+    return a, True
 
-def check_InOrderIoUseThisBot():
+def check_InOrderToUseThisBot():
     mess = client.get_messages(channel_entity.username)
     id = mess[0].id
     if mess[0].message == 'In order to use this bot, you must agree to our Terms of Service and Privacy Policy.\n\nPlease read our Terms of Service and Privacy Policy, then press the button below to move forward.':
@@ -46,14 +50,12 @@ def check_InOrderIoUseThisBot():
         s.get(
             url1,
             headers=user,
-            timeout=10,
-            allow_redirects=True
+            timeout=10
         )
         s.get(
             url2,
             headers=user,
-            timeout=10,
-            allow_redirects=True
+            timeout=10
         )
         client(
             GetBotCallbackAnswerRequest(
@@ -62,6 +64,37 @@ def check_InOrderIoUseThisBot():
                 data=mess[0].reply_markup.rows[1].buttons[0].data,
             )
         )
+
+def phoneNumber():
+    phone = input("Enter your number - ")
+    while not (phone.strip('+').isdigit()):
+        print(f"{r}{bold}{underline}Invalid the phone number! Please try again")
+        phone = input("Enter your number")
+    return phone
+
+def ChannelMember(channel, hour):
+    t = datetime.datetime.now()
+    with open("JoinMember.txt", 'a') as f:
+        f.write(
+            f"{channel} {(t + datetime.timedelta(hours=hour)).strftime('%X')},")
+
+def CreateClient(phone):
+    client = TelegramClient("session/" + phone, api_id, api_hash)
+    client.connect()
+    try:
+        client.send_code_request(phone)
+    except FloodWaitError as s:
+        h = divmod(s.seconds/60, 1)[0]//60
+        print(f"Sorry, Please try again after {int(h)} hours.")
+        exit()
+        
+    try:
+        me = client.sign_in(phone, input(f'Enter your code - '))
+    except PhoneCodeInvalidError:
+        print(f"! Wrong code, Please try again.")
+        sleep(1)
+        me = client.sign_in(phone, input(f'Enter your code - '))
+    return client
 
 def wait(sec):
     for i in range(sec, 0, -1):
@@ -270,11 +303,11 @@ def join_chats():
                         except FloodWaitError:
                             print(
                                 f"{bold}A wait of 207 seconds is required (caused by JoinChannelRequest){reset}")
-                            wait(int(210))
+                            sleep(210)
                             continue
                         except:
                             print(
-                                f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use function {bold}'Leave Channel'{reset}")
+                                f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use {bold}'Leave Channel' function {reset}")
                             break
 
                         client(
@@ -303,42 +336,18 @@ def join_chats():
                             #ChannelMember(name_chat, int(post[1].split()[-6]))
             except ConnectionError:
                 continue
-
-def ChannelMember(channel, hour):
-    t = datetime.datetime.now()
-    with open("JoinMember.txt", 'a') as f:
-        f.write(
-            f"{channel} {(t + datetime.timedelta(hours=hour)).strftime('%X')}, ")
-
-def makeclient():
-    client = TelegramClient("session/" + phone, api_id, api_hash)
-    client.connect()
-    if not client.is_user_authorized():
-        client.send_code_request(phone)
-        try:
-            me = client.sign_in(phone, input('Enter your code - '))
-
-        except PhoneCodeInvalidError:
-            print("Wrong code, Please try again.")
-            sleep(1)
-            me = client.sign_in(phone, input('Enter your code - '))
-    return client
-
-di = os.listdir("session/")
-if di == []:
-    phone = input("Enter your number - ")
-else:
-    phone = di[-1].split('.')[0]
-api_id = 4568374
-api_hash = "409e0cb48ac927663c164d064079667e"
-
 user = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 10; CPH1931) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.155 Mobile Safari/537.36"
     }
 
-
-client = makeclient()
-
+numbers = os.listdir("session/")
+if numbers == []:
+    phone = phoneNumber()
+else:
+    phone = numbers[-1].split('.')[0]
+api_id = 4568374
+api_hash = "409e0cb48ac927663c164d064079667e"
+client = CreateClient(phone)
 myself = client.get_me()
 
 os.system("cls")
@@ -349,121 +358,120 @@ print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}!, You can choose the functions below!")
 a = menu()
 
-if a == '1':
-    dic = {
-        '1': "Litecoin_click_bot",
-        '2': "BitcoinClick_bot",
-        '3': "Dogecoin_click_bot",
-        '4': "BTH_clickbot"
-    }
-    print("\n\n1) LTC\n2) BTC\n3) Doge\n4) BTH\n")
-    a = input("Select the Crypto coins - ")
-    while (a not in '1234'
-           or len(a) >= 2):
-        print(f"{r}{bold}{underline}! Invalid input, Please try again.{reset}")
+while a[-1]:
+    a = a[0]
+    if a == '1':
+        dic = {
+            '1': "Litecoin_click_bot",
+            '2': "BitcoinClick_bot",
+            '3': "Dogecoin_click_bot",
+            '4': "BTH_clickbot"
+        }
         print("\n\n1) LTC\n2) BTC\n3) Doge\n4) BTH\n")
         a = input("Select the Crypto coins - ")
-    channel_entity = client.get_entity(dic[a])
-    print()
-    sleep(1)
-    if len(os.listdir("session/")) != 1:
-        numbers = os.listdir("session/")
-        n = ''
-        for i in range(len(numbers)-1):
-            print(f"[{i+1}] {numbers[i].split('.')[0]}", end="  ")
-            n += str(i+1)
-        print("  [0] or all")
-        index = input("Choose your number above or all - ")
-        while len(index) != 1 or index not in '0'+n:
+        while (a not in '1234'
+            or len(a) >= 2):
             print(f"{r}{bold}{underline}! Invalid input, Please try again.{reset}")
-        index = int(index) - 1
-        if index == 0:
-            for number in numbers:
-                phone = number
+            print("\n\n1) LTC\n2) BTC\n3) Doge\n4) BTH\n")
+            a = input("Select the Crypto coins - ")
+        channel_entity = client.get_entity(dic[a])
+        print()
+        sleep(1)
+        if len(os.listdir("session/")) != 1:
+            numbers = os.listdir("session/")
+            n = ''
+            for i in range(len(numbers)-1):
+                print(f"[{i+1}] {numbers[i].split('.')[0]}", end="  ")
+                n += str(i+1)
+            print("  [0] or all")
+            index = input("Choose your number above or all - ")
+            while len(index) != 1 or index not in '0'+n:
+                print(f"{r}{bold}{underline}! Invalid input, Please try again.{reset}")
+            index = int(index)
+            if index == 0:
+                for number in numbers:
+                    phone = numbers.split('.')[0]
+                    client.disconnect()
+                    client = CreateClient(phone)
+                    myself = client.get_me()
+                    print(
+                        f"\n\nYour accout name: {myself.first_name} {myself.last_name}  Your number:  +{myself.phone}")
+                    try:
+                        client.get_messages(channel_entity)[0]
+                    except:
+                        client.send_message(channel_entity.username, "/start")
+                    check_InOrderToUseThisBot()
+                    print(f"{bold}=========================={reset}")
+                    print(f"        {B_r}Vist Site{reset}")
+                    print(f"{bold}=========================={reset}")
+                    vist_site()
+                    print(f"\n\n{bold}=========================={reset}")
+                    print(f"        {B_r}Message Bot{reset}")
+                    print(f"{bold}=========================={reset}")
+                    message_bot()
+                    print(f"\n\n{bold}=========================={reset}")
+                    print(f"        {B_r}Join Chats{reset}")
+                    print(f"{bold}=========================={reset}")
+                    join_chats()
+                    print('\n'*3)
+            else:
+                phone = numbers[index-1].split('.')[0]
                 client.disconnect()
-                client = makeclient()
+                client = CreateClient(phone)
                 myself = client.get_me()
-                print(
-                    f"\n\nYour accout name: {myself.first_name} {myself.last_name}  Your number:  +{myself.phone}")
-                try:
-                    client.get_messages(channel_entity)[0]
-                except:
-                    client.send_message(channel_entity.username, "/start")
-                check_InOrderIoUseThisBot()
-                print(f"{bold}=========================={reset}")
-                print(f"        {B_r}Vist Site{reset}")
-                print(f"{bold}=========================={reset}")
-                vist_site()
-                print(f"\n\n{bold}=========================={reset}")
-                print(f"        {B_r}Message Bot{reset}")
-                print(f"{bold}=========================={reset}")
-                message_bot()
-                print(f"\n\n{bold}=========================={reset}")
-                print(f"        {B_r}Join Chats{reset}")
-                print(f"{bold}=========================={reset}")
-                join_chats()
-                print('\n'*3)
-        else:
-            phone = numbers[index].split('.')[0]
-            client.disconnect()
-            client = makeclient()
-            myself = client.get_me()
-    print(
-        f"\n\nYour accout name: {myself.first_name} {myself.last_name}  Your number:  +{myself.phone}")
-    try:
-        client.get_messages(channel_entity)[0]
-    except:
-        client.send_message(channel_entity.username, "/start")
-    check_InOrderIoUseThisBot()
-    print(f"{bold}=========================={reset}")
-    print(f"        {B_r}Vist Site{reset}")
-    print(f"{bold}=========================={reset}")
-    vist_site()
-    print(f"\n\n{bold}=========================={reset}")
-    print(f"        {B_r}Message Bot{reset}")
-    print(f"{bold}=========================={reset}")
-    message_bot()
-    print(f"\n\n{bold}=========================={reset}")
-    print(f"        {B_r}Join Chats{reset}")
-    print(f"{bold}=========================={reset}")
-    join_chats()
-    print('\n'*3)
-    menu()
-
-elif a == '2':
-    groups = []
-    amount = 0
-    print(f"\n\n{bold}=========================={reset}")
-    print(f"        {B_b}Leave Channel{reset}")
-    print(f"{bold}=========================={reset}")
-    sleep(1)
-    for ch in client.get_dialogs():
+        print(
+            f"\n\nYour accout name: {myself.first_name} {myself.last_name}  Your number:  +{myself.phone}")
         try:
-            print(f"{bold}{ch.name}  {g}Leave Success{reset}")
-            client(LeaveChannelRequest(ch.id))
+            client.get_messages(channel_entity)[0]
         except:
-            continue
-        amount += 1
+            client.send_message(channel_entity.username, "/start")
+        check_InOrderToUseThisBot()
+        print(f"{bold}=========================={reset}")
+        print(f"        {B_r}Vist Site{reset}")
+        print(f"{bold}=========================={reset}")
+        vist_site()
+        print(f"\n\n{bold}=========================={reset}")
+        print(f"        {B_r}Message Bot{reset}")
+        print(f"{bold}=========================={reset}")
+        message_bot()
+        print(f"\n\n{bold}=========================={reset}")
+        print(f"        {B_r}Join Chats{reset}")
+        print(f"{bold}=========================={reset}")
+        join_chats()
+        print('\n'*3)
+        a = menu()
 
-    print(f"\n{y}[{g}✓{y}] Leave Successfully!{reset}")
-    print(f"{bold}{underline}Amount Channel: {amount}{reset}")
-    print('------------------------------------------\n\n\n')
-    menu()
+    elif a == '2':
+        groups = []
+        amount = 0
+        print(f"\n\n{bold}=========================={reset}")
+        print(f"        {B_b}Leave Channel{reset}")
+        print(f"{bold}=========================={reset}")
+        sleep(1)
+        for ch in client.get_dialogs():
+            try:
+                print(f"{bold}{ch.name}  {g}Leave Success{reset}")
+                client(LeaveChannelRequest(ch.id))
+            except:
+                continue
+            amount += 1
 
-elif a == '3':
-    print(f"\n{g}Please enter the number in the format that you use to sign up for Telegram. For example +6661783xxxx{reset}")
-    phone = input(f"{bold}Enter your number (To exit this function, type exit.) - {reset}")
-    while phone+'.session' in os.listdir("session/"):
-        print(f"{r}{underline}! This number already exists{reset}")
-        phone = input(f"{bold}Enter your number (To exit this function, type exit.) - {reset}")
-    else:
-        client = TelegramClient("session/" + phone, api_id, api_hash)
-        client.connect()
-        client.send_code_request(phone)
+        print(f"\n{y}[{g}✓{y}] Leave Successfully!{reset}")
+        print(f"{bold}{underline}Amount Channel: {amount}{reset}")
+        print('------------------------------------------\n\n\n')
+        a = menu()
+
+    elif a == '3':
         try:
-            me = client.sign_in(phone, input(f'{bold}Enter your code - {reset}'))
-        except PhoneCodeInvalidError:
-            print(f"{r}{bold}{underline}! Wrong code, Please try again.{reset}")
-            sleep(1)
-            me = client.sign_in(phone, input(f'{bold}Enter your code - {reset}'))
-        menu()
+            print(f"\n{g}Please enter the number in the format that you use to sign up for Telegram. For example +6661783xxxx and To exit this function, press Ctrl+C+Enter{reset}")
+            phone = phoneNumber()
+            while phone+'.session' in os.listdir("session/"):
+                print(f"{r}{underline}! This number already exists{reset}")
+                phone = phoneNumber()
+            client.disconnect()
+            CreateClient(phone)
+            myself = client.get_me()
+            print(f"{g}Now your accout has changed to {myself.username}({myself.phone}){reset}")
+            a = menu()
+        except KeyboardInterrupt:
+            a = menu()
