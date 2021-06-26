@@ -113,15 +113,16 @@ def skipTask(_data, _id):
     )
 
 def vist_site():
-    global g, y, w, r, reset
+    #global g, y, w, r, reset
     client.send_message(channel_entity.username, "🖥 Visit sites")
     sleep(1)
     mess = client.get_messages(channel_entity.username)[0]
-
+    sleep(1)
     if mess.message == "🖥 Visit sites":
-        client.send_message(channel_entity.username, "🖥 Visit sites")
-        print("! Server Bot is low")
-        while mess == "🖥 Visit sites":
+        print(f"{r}! Server Bot is low, Please wait...{reset}")
+        while mess.message == "🖥 Visit sites":
+            client.send_message(channel_entity.username, "🖥 Visit sites")
+            sleep(2)
             mess = client.get_messages(channel_entity.username)[0]
 
     for _ in range(50):
@@ -187,14 +188,14 @@ def vist_site():
         except ConnectionError:
             continue
 def message_bot():
-    global g, y, w, r, reset
     client.send_message(channel_entity.username, "🤖 Message bots")
     sleep(1)
     mess = client.get_messages(channel_entity.username)[0]
-    if mess == "🤖 Message bots":
-        client.send_message(channel_entity.username, "🤖 Message bots")
+    if mess.message == "🤖 Message bots":
         print(f"{r}! Server Bot is low{reset}")
-        while mess == "🤖 Message bots":
+        while mess.message == "🤖 Message bots":
+            client.send_message(channel_entity.username, "🤖 Message bots")
+            sleep(2)
             mess = client.get_messages(channel_entity.username)[0]
     for _ in range(60):
         try:
@@ -246,7 +247,6 @@ def message_bot():
         except ConnectionError:
             continue
 def join_chats():
-    global g, y, w, r, reset
     client.send_message(channel_entity.username, "📣 Join chats")
     a = 0
     sleep(1)
@@ -255,7 +255,9 @@ def join_chats():
     if mess.message == "📣 Join chats":
         client.send_message(channel_entity.username, "📣 Join chats")
         print("! Server Bot is low")
-        while mess == "📣 Join chats":
+        while mess.message == "📣 Join chats":
+            client.send_message(channel_entity.username, "📣 Join chats")
+            sleep(2)
             mess = client.get_messages(channel_entity.username)[0]
 
     for _ in range(40):
