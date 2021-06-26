@@ -350,9 +350,8 @@ api_hash = "409e0cb48ac927663c164d064079667e"
 client = CreateClient(phone)
 myself = client.get_me()
 
-os.system("cls")
+os.system("clear")
 
-#Banner
 print(f"\n{b}TAE{reset}\n")
 print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}!, You can choose the functions below!")
