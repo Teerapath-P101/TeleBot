@@ -71,18 +71,22 @@ def menu():
     return a, True
 
 def menu_crytoCoin():
-    print("\n\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n5) ZEC\n")
-    index = input("Select the Crypto coins - ")
-    while (index not in '12345' or len(index) != 1):
-        print(f"{r}{bold}{underline}! Invalid input, Please try again.{reset}")
+    index = " "
+    f = "a"
+    while (len(index)!=1 or index not in '12345' 
+            or f not in "vmja"):
         print("\n\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n")
-        index = input("Select the Crypto coins - ")
-    channel_username = click_bot_username[index][0]
+        index = input("Select the Crypto coins - ").lower()
+        if len(index)==3 and not index.isdigit():
+        	i2 = index
+        	index = i2[0]
+        	f = i2[2]
+    channel_username = click_bot_username[int(index)-1][0]
     try:
         client.send_message(channel_username, "/start")
     except YouBlockedUser:
         print(f"! {r}{bold}{underline}You have been banned... Please use another Crypto coin.{reset}")
-        return  #if it is banned
+        return menu_crytoCoin()  #if it is banned
     return channel_username
 
 def check_InOrderToUseThisBot(theChannel):
@@ -112,8 +116,8 @@ def ChannelMember(channel, hour):
 
 def memo_phone_numbers_and_session_string(number, session_string):
     phone_session[number] = session_string
-    with open('.phone_numbers_and_session_string.json', 'w') as w_:
-        json.dump(phone_session, w_)
+    with open('.phone_numbers_and_session_string.json', 'w') as w_m:
+        json.dump(phone_session, w_m)
 
 def CreateClient(new_client=False):
     if new_client:
@@ -152,6 +156,9 @@ def waitforcoin(sec):
 #     client.request_callback_answer(channel_username, message_id, callback_data)
 
 def visit_sites():
+    print(f"{bold}=========================={reset}")
+    print(f"        {B_r}Vist Site{reset}")
+    print(f"{bold}=========================={reset}")
     client.send_message(channel_username, "🖥 Visit sites")
     for _ in range(50):
         sleep(2)
@@ -200,6 +207,9 @@ def visit_sites():
             client.send_message(channel_username, "🖥 Visit sites")
 
 def message_bots():
+    print(f"{bold}=========================={reset}")
+    print(f"        {B_r}Message Bot{reset}")
+    print(f"{bold}=========================={reset}")
     client.send_message(channel_username, "🤖 Message bots")
     for _ in range(50):
         sleep(2)
@@ -243,6 +253,9 @@ def message_bots():
             continue
 
 def join_chats():
+    print(f"\n{bold}=========================={reset}")
+    print(f"        {B_r}Join Chats{reset}")
+    print(f"{bold}=========================={reset}")
     client.send_message(channel_username, "📣 Join chats")
     a = 0
     for _ in range(50):
@@ -326,31 +339,36 @@ else:
     #phone = '+'+myself.phone_number
 os.system('cls' if os.name=='nt' else 'clear')
 
-print(f"\n{b}TAE{reset}\n")
+banned1 = """████████╗ █████╗ ███████╗         
+╚══██╔══╝██╔══██╗██╔════╝         
+   ██║   ███████║█████╗           
+   ██║   ██╔══██║██╔══╝           
+   ██║   ██║  ██║███████╗██╗██╗██╗
+   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝╚═╝
+                                  """
+banned2 = """ _________     _       ________           
+|  _   _  |   / \     |_   __  |          
+|_/ | | \_|  / _ \      | |_ \_|          
+    | |     / ___ \     |  _| _           
+   _| |_  _/ /   \ \_  _| |__/ | _  _  _  
+  |_____||____| |____||________|(_)(_)(_) 
+                                          """
+print(f"""\n{b}{banned1}{reset}\n""")
 print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}! You can choose the functions below!")
 menu_Chossed = menu()
 while menu_Chossed[1]:
     if menu_Chossed[0] == '1':
         channel_username = menu_crytoCoin()
-        while not channel_username:
-            channel_username = menu_crytoCoin(channel_username)
         for i, client in enumerate(clients):
             myself = client.get_me()
-            print(f"\u001b[38;5;It will run all accounts! (There are {len(clients)}){reset}")
+            print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
             print(f"\n{bold}{i+1}. {cyan}{myself.first_name} {myself.last_name} {w}({cyan}+{myself.phone_number}{w}){reset}")
             check_InOrderToUseThisBot(channel_username)
-            print(f"{bold}=========================={reset}")
-            print(f"        {B_r}Vist Site{reset}")
-            print(f"{bold}=========================={reset}")
             visit_sites()
-            print(f"{bold}=========================={reset}")
-            print(f"        {B_r}Message Bot{reset}")
-            print(f"{bold}=========================={reset}")
+            
             message_bots()
-            print(f"\n{bold}=========================={reset}")
-            print(f"        {B_r}Join Chats{reset}")
-            print(f"{bold}=========================={reset}")
+            
             join_chats()
         print("\n\n")
         menu_Chossed = menu()
@@ -382,23 +400,27 @@ while menu_Chossed[1]:
     
     elif menu_Chossed[0] == '3':
         #phone = phoneNumber()
-        a = input("Are you sure? (y/n) - ").lower()
-        if a == "y":
+        sure = input("Are you sure? (y/n) - ").lower()
+        if sure == "y":
             cli = CreateClient(new_client=True)
             me = cli.get_me()
             print(f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
             clients.append(cli)
             phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
-            menu_Chossed = menu()
-        else:
-            pass
+        menu_Chossed = menu()
+        
     elif menu_Chossed[0] == '4':
+    	menu_Chossed = menu()
+    	
+    elif menu_Chossed[0] == '5':
         print(bold+"There are", len(clients))
         for cli in clients:
             me = cli.get_me()
-            print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_session}{w})")
-    elif menu_Chossed[0] == '5':
-        print(f"\n{bold}You have {len(phone_session)} account:")
+            print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+        menu_Chossed = menu()
+       
+    elif menu_Chossed[0] == '6':
+        print(f"\n{bold}You have {len(clients)} account:")
         print("Please, wait...")
         clients_balance = {}
         for client in clients:
@@ -406,7 +428,6 @@ while menu_Chossed[1]:
             phone = "+"+me.phone_number
             balances = {"LTC": 0, "BTC": 0, "Doge": 0, "BCH": 0, "ZEC": 0}
             cli = f"{me.first_name} {me.last_name} ({phone})"
-            clients_balance[cli] = {}
             for index in click_bot_username:
                 name = click_bot_username[index][0]
                 name2 = click_bot_username[index][1]
@@ -428,7 +449,15 @@ while menu_Chossed[1]:
             for balance in balances:
                 if balances[balance] == "Banned":
                     print(f"    {b}{balance} balances: {r}Banned")
-                    continue
-                print(f"    {b}{balance} balances: {y}{balances[balance]}{reset}")
-            print('------------------------------------------\n')
+                else:
+                    print(f"    {b}{balance} balances: {y}{balances[balance]}")
+        print('------------------------------------------\n')
         menu_Chossed = menu()
+
+"""
+ทำที่เลือกแบบใหม่ เป็น dict
+เพิ่ม funcion Delete account
+quit เป็นบรรทัยสุดท้ายแทนที่อยู่ใน menu()
+Error pyrogram.errors.exceptions.bad_request_400.UsernameInvalid: [400 USERNAME_INVALID]: The username is invalid (caused by "contacts.ResolveUsername")
+Photo in phone
+"""
