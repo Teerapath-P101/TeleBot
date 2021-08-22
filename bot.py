@@ -1,4 +1,8 @@
-import os, datetime, re, json
+import os
+import datetime
+import re
+import json
+import random
 from cfproxy import CFProxy
 from typing import NamedTuple
 
@@ -6,21 +10,23 @@ try:
     from pyrogram import Client
     import requests
 except:
-    os.system("pip3 install -U https://github.com/pyrogram/pyrogram/archive/master.zip")
+    os.system(
+        "pip3 install -U https://github.com/pyrogram/pyrogram/archive/master.zip")
     os.system("pip3 install -U pyrogram tgcrypto")
     os.system("pip3 install requests")
     from pyrogram import Client
     import requests
 from pyrogram.errors import FloodWait
-from pyrogram.errors.exceptions.bad_request_400 import PasswordRequired, YouBlockedUser, PhoneCodeInvalid
+from pyrogram.errors.exceptions.bad_request_400 import PasswordRequired, YouBlockedUser, PhoneCodeInvalid, UsernameInvalid, UsernameNot0ccupied, UsersTooMuch, ChannelsTooMuch, BotResponseTimeout
 from pyrogram.errors.exceptions.forbidden_403 import ChatSendPollForbidden
 from time import sleep
 from requests.exceptions import ConnectionError
 
-api_id= 5330210
-api_hash= "a112ebb70ccee839801ef08744372fff"
+api_id = 5330210
+api_hash = "a112ebb70ccee839801ef08744372fff"
 #s = requests.Session()
-proxy = CFProxy('my.byoi.workers.dev', 'Mozilla/5.0 (Linux; Android 10; CPH1931) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Mobile Safari/537.36', '1.1.1.1')
+proxy = CFProxy('my.byoi.workers.dev',
+                'Mozilla/5.0 (Linux; Android 10; CPH1931) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Mobile Safari/537.36', '1.1.1.1')
 #s.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0Win64x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 #user = s.headers
 click_bot_username = {
@@ -47,6 +53,7 @@ if not os.path.exists(".phone_numbers_and_session_string.json"):
         w_.write('{}')
 phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
 
+
 def menu():
     print(f"{bold}\nYour accout name: {b}{myself.first_name} {myself.last_name}{w} Your number: {b}+{myself.phone_number}{reset}")
     print(f"{bold}1) Start bot")
@@ -61,29 +68,32 @@ def menu():
         f = input("Enter your choice - ")
     return f, True
 
+
 def menu_crytoCoin():
     print("You can use (1/2/3/4/5) (v/m/j) for example: \n1 v (it means start LTC bot with only visit site)")
     index = " "
     f = "a"
-    while (len(index)!=1 or index not in '12345' 
+    while (not click_bot_username.get(index)
             or f not in "vmja"):
         print("\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n")
         index = input("Select the Crypto coins - ").lower()
-        if len(index)==3 and not index.isdigit():
-        	i2 = index
-        	index = i2[0]
-        	f = i2[2]
+        if len(index) == 3 and not index.isdigit():
+            i2 = index
+            index = i2[0]
+            f = i2[2]
     channel_username = click_bot_username[index][0]
     try:
         client.send_message(channel_username, "/start")
     except YouBlockedUser:
-        print(f"! {r}{bold}{underline}You have been banned... Please use another Crypto coin.{reset}")
-        return menu_crytoCoin()  #if it is banned
+        print(
+            f"! {r}{bold}{underline}You have been banned... Please use another Crypto coin.{reset}")
+        return menu_crytoCoin()  # if it is banned
     return channel_username, f
+
 
 def check_InOrderToUseThisBot(theChannel):
     message = client.get_history(theChannel, limit=1)[0]
-    if message.text.find('In order to use this bot') != -1:    
+    if message.text.find('In order to use this bot') != -1:
         callback_data = message.reply_markup.inline_keyboard[1][0].callback_data
         url1 = message.reply_markup.inline_keyboard[0][0].url
         url2 = message.reply_markup.inline_keyboard[0][1].url
@@ -91,7 +101,9 @@ def check_InOrderToUseThisBot(theChannel):
         # s.get(url2, headers=user)
         proxy.get(url1)
         proxy.get(url2)
-        client.request_callback_answer(theChannel, message.message_id, callback_data)
+        client.request_callback_answer(
+            theChannel, message.message_id, callback_data)
+
 
 def phoneNumber():
     phone = input("Enter your number (with +) - ")
@@ -100,16 +112,19 @@ def phoneNumber():
         phone = input("Enter your number (with +) - ")
     return phone
 
+
 def ChannelMember(channel, hour):
     t = datetime.datetime.now()
     with open("JoinMember.txt", 'a') as fl:
         fl.write(
             f"{channel} {(t + datetime.timedelta(hours=hour)).strftime('%X')},")
 
+
 def memo_phone_numbers_and_session_string(number, session_string):
     phone_session[number] = session_string
     with open('.phone_numbers_and_session_string.json', 'w') as w_m:
         json.dump(phone_session, w_m)
+
 
 def CreateClient(new_client=False):
     if new_client:
@@ -118,12 +133,14 @@ def CreateClient(new_client=False):
         client = Client("client", api_id, api_hash)
         client.start()
         phone = "+"+(client.get_me().phone_number)
-        memo_phone_numbers_and_session_string(phone, client.export_session_string())
+        memo_phone_numbers_and_session_string(
+            phone, client.export_session_string())
         return client
     else:
         client = Client(session_string, api_id, api_hash)
         client.start()
         return client
+
 
 def waitforcoin(sec):
     for i in range(sec, 0, -1):
@@ -134,6 +151,7 @@ def waitforcoin(sec):
 
 # def callbackButton(message_id, callback_data):
 #     client.request_callback_answer(channel_username, message_id, callback_data)
+
 
 def visit_sites():
     print(f"{bold}=========================={reset}")
@@ -163,28 +181,35 @@ def visit_sites():
                     print(res.text, f"\n\n{r}Fix{reset}")
                 elif res.find('class="g-recaptcha"') != -1:
                     print(f"{r}Skip! This Website has Captcha!{reset}")
-                    client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                    client.request_callback_answer(
+                        channel_username, message_id, callback_data_SkipButton)
                 elif res.find('class="container-fluid"') != -1:
                     try:
-                        data = re.findall('class="container-fluid" (.*) data-curr=', res)[0].split()
+                        data = re.findall(
+                            'class="container-fluid" (.*) data-curr=', res)[0].split()
                     except:
                         continue
                     timer = data[1].split('=')[1].strip('"')
                     code = data[0].split('=')[1].strip('"')
                     token = data[2].split('=')[1].strip('"')
                     waitforcoin(int(timer))
-                    proxy.post("https://dogeclick.com/reward", data={"code": code, "token": token})
+                    proxy.post("https://dogeclick.com/reward",
+                               data={"code": code, "token": token})
                     sleep(2)
-                    message_reward = client.get_history(channel_username, limit=2)[1].text
+                    message_reward = client.get_history(
+                        channel_username, limit=2)[1].text
                     print(f"{y}[{g}✓{y}] {message_reward}{reset}")
                 else:
-                    timer = client.get_history(channel_username, limit=1)[0].text.split()[-2]
+                    timer = client.get_history(channel_username, limit=1)[
+                        0].text.split()[-2]
                     waitforcoin(int(timer))
                     sleep(2)
-                    message_reward = client.get_history(channel_username, limit=2)[1].text
+                    message_reward = client.get_history(
+                        channel_username, limit=2)[1].text
                     print(f"{y}[{g}✓{y}] {message_reward}{reset}")
         except:
             client.send_message(channel_username, "🖥 Visit sites")
+
 
 def message_bots():
     print(f"{bold}=========================={reset}")
@@ -211,7 +236,8 @@ def message_bots():
                 if res.find("Just a moment...") != -1:
                     print(res.text, f"\n\n{r}Fix{reset}")
                 else:
-                    name_bot = re.findall('<title>Telegram: Contact (.*)</title>', res)[0]
+                    name_bot = re.findall(
+                        '<title>Telegram: Contact (.*)</title>', res)[0]
                     client.send_message(name_bot, "/start")
                     sleep(2)
                     message = client.get_history(name_bot, limit=1)[0]
@@ -220,17 +246,21 @@ def message_bots():
                         sleep(1)
                         c += 1
                         message = client.get_history(name_bot, limit=1)[0]
-                    client.forward_messages(channel_username, name_bot, message.message_id)
+                    client.forward_messages(
+                        channel_username, name_bot, message.message_id)
                     sleep(2)
                     post = client.get_history(channel_username)[0]
                     if post.text.split('\n\n')[0] == "Sorry, that is not a valid forwarded message.":
                         print(f"{r}Skip! This chat bot is not responding.{reset}")
-                        client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                        client.request_callback_answer(
+                            channel_username, message_id, callback_data_SkipButton)
                     else:
-                        reward = client.get_history(channel_username, limit=2)[1].text
+                        reward = client.get_history(
+                            channel_username, limit=2)[1].text
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
         except ConnectionError:
             continue
+
 
 def join_chats():
     print(f"\n{bold}=========================={reset}")
@@ -243,7 +273,7 @@ def join_chats():
         message = client.get_history(channel_username, limit=1)[0]
         try:
             if message.text.find("Sorry,") != -1:
-                if a==2:
+                if a == 2:
                     print(f"{bold}Sorry, there are no new ads available.{reset}\n")
                     break
                 else:
@@ -270,53 +300,60 @@ def join_chats():
                     except FloodWait:
                         for t in range(280, 0, -1):
                             print("\r", end="")
-                            print(f'{bold}A wait of {t} seconds is required (caused by "channels.JoinChannel"){reset}', end="")
+                            print(
+                                f'{bold}A wait of {t} seconds is required (caused by "channels.JoinChannel"){reset}', end="")
                             sleep(1)
                         print('\r', end='')
                         continue
-                    # except UsersTooMuchError:
-                    #     print(f"{r}Skip! This group is full.{reset}")
-                    #     callbackButton(message_id, callback_data_SkipButton)
-                    #     continue
-                    # except BotResponseTimeoutError:
-                    #     print(f"{r}Skip! Servers of this group are low.{reset}")
-                    #     callbackButton(message_id, callback_data_SkipButton)
-                    # except FloodWait:
-                    #     print(f"{bold}A wait of 207 seconds is required (caused by JoinChannelRequest){reset}")
-                    #     sleep(210)
-                    #     continue
-                    # except:
-                    #     print(f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use {bold}'Leave Channel' function {reset}")
-                    #     break
-                    client.request_callback_answer(channel_username, message_id, callback_data_JoinedButton)
+                    except (UsernameInvalid, UsernameNot0ccupied):
+                        print(f"{r}This username is invalid. Skip!{reset}")
+                        client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                        continue
+                    except ChannelsTooMuch:
+                        print(f"{r}Skip! This group is full.{reset}")
+                        client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                        continue
+                    except BotResponseTimeout:
+                        print(f"{r}Skip! Servers of this group are low.{reset}")
+                        client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                    except UsersTooMuch:
+                        print(f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use {bold}'Leave Channel' function {reset}")
+                        break
+                    client.request_callback_answer(
+                        channel_username, message_id, callback_data_JoinedButton)
                     message = client.get_history(channel_username, limit=1)[0]
                     sleep(2)
                     if message.text.find("Sorry,") != -1:
                         continue
                     elif message.text.find("Success! 👍") != -1:
-                        reward = "\n".join(client.get_history(channel_username, limit=1)[0].text.split('\n')[1:])
+                        reward = "\n".join(client.get_history(
+                            channel_username, limit=1)[0].text.split('\n')[1:])
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
                         client.send_message(channel_username, "📣 Join chats")
                     else:
-                        reward = '\n'.join((client.get_history(channel_username, limit=2)[1].text.split('\n')[1:]))
+                        reward = '\n'.join(
+                            (client.get_history(channel_username, limit=2)[1].text.split('\n')[1:]))
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
         except ConnectionError:
             pass
 
+
 def start():
-    global channel_username, client
+    global channel_username
     result = menu_crytoCoin()
     channel_username = result[0]
     f = result[1]
     for i, client in enumerate(clients):
         me = client.get_me()
         print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
-        print(f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
+        print(
+            f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
         check_InOrderToUseThisBot(channel_username)
-        funcs = {'v':[visit_sites], 'm':[message_bots], 'j':[join_chats], 'a':[visit_sites, message_bots, join_chats]}
+        funcs = {'v': [visit_sites], 'm': [message_bots], 'j': [join_chats], 'a': [visit_sites, message_bots, join_chats]}
         for func in funcs[f]:
-        	func()
+       	    func()
     print("\n\n")
+
 
 def leave():
     print(f"\n\n{bold}=========================={reset}")
@@ -325,8 +362,10 @@ def leave():
     for i, cli in enumerate(clients):
         amount = 0
         me = cli.get_me()
-        print(f"\u001b[38;5;It will run all accounts! (There are {len(clients)}){reset}")
-        print(f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
+        print(
+            f"\u001b[38;5;It will run all accounts! (There are {len(clients)}){reset}")
+        print(
+            f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
         for ch in cli.get_dialogs(limit=500):
             try:
                 chat = ch.chat
@@ -341,30 +380,40 @@ def leave():
         print(f"\n{y}[{g}✓{y}] Leave Successfully!{reset}")
         print(f"{bold}{underline}Total Channel: {amount}{reset}")
         print('------------------------------------------\n\n')
+
+
 def add():
-    global phone_session
+    global phone_session, clients
     #phone = phoneNumber()
     sure = input("Are you sure? (y/n) - ").lower()
     if sure == "y":
         cli = CreateClient(new_client=True)
         me = cli.get_me()
-        print(f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
+        print(
+            f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
         clients.append(cli)
-        phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
-    	
+        phone_session = json.load(
+            open('.phone_numbers_and_session_string.json', 'r'))
+
     elif menu_Chossed[0] == '5':
         print(bold+"There are", len(clients))
         for cli in clients:
             me = cli.get_me()
-            print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+            print(
+                f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+
+
 def delete():
 	pass
+
 
 def check_acc():
     print(bold+"There are", len(clients))
     for cli in clients:
         me = cli.get_me()
-        print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+        print(
+            f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+
 
 def Quit():
 	try:
@@ -374,6 +423,7 @@ def Quit():
 	   pass
 	print(f"{g}{bold}Bye Bye, See you again Thanks for using this bot :), Good luck{reset}")
 	quit()
+
 
 if phone_session == {}:
     #phone = phoneNumber()
@@ -389,24 +439,31 @@ else:
     client = clients[0]
     myself = client.get_me()
     #phone = '+'+myself.phone_number
-os.system('cls' if os.name=='nt' else 'clear')
+os.system('cls' if os.name == 'nt' else 'clear')
 
-main_menu = {"1":start, "2":leave, "3":add, "4":delete, "5":check_acc, "6": Quit}
-banned1 = """████████╗ █████╗ ███████╗         
+main_menu = {"1": start, "2": leave, "3": add,
+             "4": delete, "5": check_acc, "6": Quit}
+banner1 = """
+████████╗ █████╗ ███████╗         
 ╚══██╔══╝██╔══██╗██╔════╝         
    ██║   ███████║█████╗           
    ██║   ██╔══██║██╔══╝           
    ██║   ██║  ██║███████╗██╗██╗██╗
    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝╚═╝
                                   """
-banned2 = """ _________     _       ________           
-|  _   _  |   / \     |_   __  |          
-|_/ | | \_|  / _ \      | |_ \_|          
-    | |     / ___ \     |  _| _           
-   _| |_  _/ /   \ \_  _| |__/ | _  _  _  
-  |_____||____| |____||________|(_)(_)(_) 
-                                          """
-print(f"\n{b}{banned1}{reset}\n")
+banner2 = """
+╔╦╗╔═╗╔═╗   
+ ║ ╠═╣║╣    
+ ╩ ╩ ╩╚═╝ooo"""
+banner3 = f"""
+_/_/_/_/_/         _/_/        _/_/_/_/                  
+   _/           _/    _/      _/                         
+  _/           _/_/_/_/      _/_/_/                      
+ _/           _/    _/      _/                           
+_/           _/    _/      _/_/_/_/       _/   _/   _/ """
+
+banner = random.choice([banner1, banner2, banner3])
+print(f"{b}{banner}{reset}\n")
 print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}! You can choose the functions below!")
 menu_Chossed = menu()
