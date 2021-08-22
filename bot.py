@@ -48,46 +48,38 @@ if not os.path.exists(".phone_numbers_and_session_string.json"):
 phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
 
 def menu():
-    print(f"{bold}\nYour accout name: {b}{myself.first_name} {myself.last_name}{w} Your number: {b}{myself.phone_number}{reset}")
+    print(f"{bold}\nYour accout name: {b}{myself.first_name} {myself.last_name}{w} Your number: {b}+{myself.phone_number}{reset}")
     print(f"{bold}1) Start bot")
     print("2) Leave channel")
-    print("3) Add number")
-    print("4) Check account")
-    print("5) Check all balances")
+    print("3) Add account")
+    print("4) Delete account")
+    print("5) Check account")
     print(f"6) Quit{reset}")
-    a = input("Enter your choice - ")
-    while len(a) != 1 or a not in '123456':
+    f = input("Enter your choice - ")
+    while not main_menu.get(f):
         print(f"{r}{bold}{underline}Input invalid!{reset} Please enter again.")
-        a = input("Enter your choice - ")
-    if a == '6':
-        try:
-            for cli in clients:
-                cli.terminate()
-        except:
-            pass
-        print(
-            f"{g}{bold}Bye Bye, See you again Thanks for using this bot :), Good luck{reset}")
-        quit()
-    return a, True
+        f = input("Enter your choice - ")
+    return f, True
 
 def menu_crytoCoin():
+    print("You can use (1/2/3/4/5) (v/m/j) for example: \n1 v (it means start LTC bot with only visit site)")
     index = " "
     f = "a"
     while (len(index)!=1 or index not in '12345' 
             or f not in "vmja"):
-        print("\n\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n")
+        print("\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n")
         index = input("Select the Crypto coins - ").lower()
         if len(index)==3 and not index.isdigit():
         	i2 = index
         	index = i2[0]
         	f = i2[2]
-    channel_username = click_bot_username[int(index)-1][0]
+    channel_username = click_bot_username[index][0]
     try:
         client.send_message(channel_username, "/start")
     except YouBlockedUser:
         print(f"! {r}{bold}{underline}You have been banned... Please use another Crypto coin.{reset}")
         return menu_crytoCoin()  #if it is banned
-    return channel_username
+    return channel_username, f
 
 def check_InOrderToUseThisBot(theChannel):
     message = client.get_history(theChannel, limit=1)[0]
@@ -110,8 +102,8 @@ def phoneNumber():
 
 def ChannelMember(channel, hour):
     t = datetime.datetime.now()
-    with open("JoinMember.txt", 'a') as f:
-        f.write(
+    with open("JoinMember.txt", 'a') as fl:
+        fl.write(
             f"{channel} {(t + datetime.timedelta(hours=hour)).strftime('%X')},")
 
 def memo_phone_numbers_and_session_string(number, session_string):
@@ -124,20 +116,8 @@ def CreateClient(new_client=False):
         if os.path.exists('client.session'):
             os.remove('client.session')
         client = Client("client", api_id, api_hash)
-        #client.connect()
-        # try:
-        #     code = client.send_code(phone)
-        #     client.sign_in(phone, code.phone_code_hash, input("Enter your verification code - "))
-        # except PhoneCodeInvalid:
-        #     print('Wrong code! I will send you a new code. Please try again')
-        #     code = client.send_code(phone)
-        #     client.sign_in(phone, code.phone_code_hash, input("Enter your verification code - "))
-        # except FloodWait as s:
-        #     h = divmod(s.seconds/60, 1)[0]//60
-        #     print(f"Sorry, Please try again after {int(h)} hours.")
-        #     exit()
         client.start()
-        phone = client.get_me().phone_number
+        phone = "+"+(client.get_me().phone_number)
         memo_phone_numbers_and_session_string(phone, client.export_session_string())
         return client
     else:
@@ -323,6 +303,78 @@ def join_chats():
         except ConnectionError:
             pass
 
+def start():
+    global channel_username, client
+    result = menu_crytoCoin()
+    channel_username = result[0]
+    f = result[1]
+    for i, client in enumerate(clients):
+        me = client.get_me()
+        print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
+        print(f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
+        check_InOrderToUseThisBot(channel_username)
+        funcs = {'v':[visit_sites], 'm':[message_bots], 'j':[join_chats], 'a':[visit_sites, message_bots, join_chats]}
+        for func in funcs[f]:
+        	func()
+    print("\n\n")
+
+def leave():
+    print(f"\n\n{bold}=========================={reset}")
+    print(f"      {B_b}Leave Channel{reset}")
+    print(f"{bold}=========================={reset}\n")
+    for i, cli in enumerate(clients):
+        amount = 0
+        me = cli.get_me()
+        print(f"\u001b[38;5;It will run all accounts! (There are {len(clients)}){reset}")
+        print(f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
+        for ch in cli.get_dialogs(limit=500):
+            try:
+                chat = ch.chat
+                if chat.title != None:
+                    print(f"{bold}{chat.title}  {g}Leave Success{reset}")
+                    cli.leave_chat(chat.id)
+                    amount += 1
+                else:
+                    continue
+            except:
+                pass
+        print(f"\n{y}[{g}✓{y}] Leave Successfully!{reset}")
+        print(f"{bold}{underline}Total Channel: {amount}{reset}")
+        print('------------------------------------------\n\n')
+def add():
+    global phone_session
+    #phone = phoneNumber()
+    sure = input("Are you sure? (y/n) - ").lower()
+    if sure == "y":
+        cli = CreateClient(new_client=True)
+        me = cli.get_me()
+        print(f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
+        clients.append(cli)
+        phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
+    	
+    elif menu_Chossed[0] == '5':
+        print(bold+"There are", len(clients))
+        for cli in clients:
+            me = cli.get_me()
+            print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+def delete():
+	pass
+
+def check_acc():
+    print(bold+"There are", len(clients))
+    for cli in clients:
+        me = cli.get_me()
+        print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+
+def Quit():
+	try:
+	   for cli in clients:
+	   	cli.terminate()
+	except:
+	   pass
+	print(f"{g}{bold}Bye Bye, See you again Thanks for using this bot :), Good luck{reset}")
+	quit()
+
 if phone_session == {}:
     #phone = phoneNumber()
     clients = [CreateClient(new_client=True)]
@@ -339,6 +391,7 @@ else:
     #phone = '+'+myself.phone_number
 os.system('cls' if os.name=='nt' else 'clear')
 
+main_menu = {"1":start, "2":leave, "3":add, "4":delete, "5":check_acc, "6": Quit}
 banned1 = """████████╗ █████╗ ███████╗         
 ╚══██╔══╝██╔══██╗██╔════╝         
    ██║   ███████║█████╗           
@@ -353,111 +406,16 @@ banned2 = """ _________     _       ________
    _| |_  _/ /   \ \_  _| |__/ | _  _  _  
   |_____||____| |____||________|(_)(_)(_) 
                                           """
-print(f"""\n{b}{banned1}{reset}\n""")
+print(f"\n{b}{banned1}{reset}\n")
 print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}! You can choose the functions below!")
 menu_Chossed = menu()
 while menu_Chossed[1]:
-    if menu_Chossed[0] == '1':
-        channel_username = menu_crytoCoin()
-        for i, client in enumerate(clients):
-            myself = client.get_me()
-            print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
-            print(f"\n{bold}{i+1}. {cyan}{myself.first_name} {myself.last_name} {w}({cyan}+{myself.phone_number}{w}){reset}")
-            check_InOrderToUseThisBot(channel_username)
-            visit_sites()
-            
-            message_bots()
-            
-            join_chats()
-        print("\n\n")
-        menu_Chossed = menu()
-
-    elif menu_Chossed[0] == '2':
-        print(f"\n\n{bold}=========================={reset}")
-        print(f"      {B_b}Leave Channel{reset}")
-        print(f"{bold}=========================={reset}\n")
-        for client in clients:
-            amount = 0
-            myself = client.get_me()
-            print(f"\u001b[38;5;It will run all accounts! (There are {len(clients)}){reset}")
-            print(f"\n{bold}{i+1}. {cyan}{myself.first_name} {myself.last_name} {w}({cyan}+{myself.phone_number}{w}){reset}")
-            for ch in client.get_dialogs(limit=500):
-                try:
-                    chat = ch.chat
-                    if chat.title != None:
-                        print(f"{bold}{chat.title}  {g}Leave Success{reset}")
-                        client.leave_chat(chat.id)
-                        amount += 1
-                    else:
-                        continue
-                except:
-                    pass
-            print(f"\n{y}[{g}✓{y}] Leave Successfully!{reset}")
-            print(f"{bold}{underline}Total Channel: {amount}{reset}")
-            print('------------------------------------------\n\n')
-        menu_Chossed = menu()
-    
-    elif menu_Chossed[0] == '3':
-        #phone = phoneNumber()
-        sure = input("Are you sure? (y/n) - ").lower()
-        if sure == "y":
-            cli = CreateClient(new_client=True)
-            me = cli.get_me()
-            print(f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
-            clients.append(cli)
-            phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
-        menu_Chossed = menu()
-        
-    elif menu_Chossed[0] == '4':
-    	menu_Chossed = menu()
-    	
-    elif menu_Chossed[0] == '5':
-        print(bold+"There are", len(clients))
-        for cli in clients:
-            me = cli.get_me()
-            print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
-        menu_Chossed = menu()
-       
-    elif menu_Chossed[0] == '6':
-        print(f"\n{bold}You have {len(clients)} account:")
-        print("Please, wait...")
-        clients_balance = {}
-        for client in clients:
-            me = client.get_me()
-            phone = "+"+me.phone_number
-            balances = {"LTC": 0, "BTC": 0, "Doge": 0, "BCH": 0, "ZEC": 0}
-            cli = f"{me.first_name} {me.last_name} ({phone})"
-            for index in click_bot_username:
-                name = click_bot_username[index][0]
-                name2 = click_bot_username[index][1]
-                try:
-                    client.send_message(name, "💰 Balance")
-                    sleep(2)
-                    check_InOrderToUseThisBot(name)
-                    if client.get_history(name, limit=1)[0].text.find("Welcome to") != -1:
-                        client.send_message(name, "💰 Balance")
-                        sleep(2)
-                    balances[name2] = client.get_history(name, limit=1)[0].text
-                except YouBlockedUser:
-                    balances[name2] = "Banned"
-            clients_balance[cli] = balances
-        print("\r", end="")
-        for i, c in enumerate(clients_balance):
-            print(f"{bold}{i+1}. {cyan}{c}{reset}")
-            balances = clients_balance[c]
-            for balance in balances:
-                if balances[balance] == "Banned":
-                    print(f"    {b}{balance} balances: {r}Banned")
-                else:
-                    print(f"    {b}{balance} balances: {y}{balances[balance]}")
-        print('------------------------------------------\n')
-        menu_Chossed = menu()
+    main_menu[menu_Chossed[0]]()
+    menu_Chossed = menu()
 
 """
-ทำที่เลือกแบบใหม่ เป็น dict
-เพิ่ม funcion Delete account
-quit เป็นบรรทัยสุดท้ายแทนที่อยู่ใน menu()
+pyrogram.errors.exceptions.bad_request_400.  UsernameNot0ccupied: [400 USERNAME_NOT_OCCUPIED]: The username is not occupied by any one (caused by "contacts.ResolveUsername")
 Error pyrogram.errors.exceptions.bad_request_400.UsernameInvalid: [400 USERNAME_INVALID]: The username is invalid (caused by "contacts.ResolveUsername")
 Photo in phone
 """
