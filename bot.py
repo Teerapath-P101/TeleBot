@@ -1,8 +1,4 @@
-import os
-import datetime
-import re
-import json
-import random
+import os, datetime, re, json, random
 from cfproxy import CFProxy
 from typing import NamedTuple
 
@@ -17,7 +13,7 @@ except:
     from pyrogram import Client
     import requests
 from pyrogram.errors import FloodWait
-from pyrogram.errors.exceptions.bad_request_400 import PasswordRequired, YouBlockedUser, PhoneCodeInvalid, UsernameInvalid, UsernameNot0ccupied, UsersTooMuch, ChannelsTooMuch, BotResponseTimeout
+from pyrogram.errors.exceptions.bad_request_400 import PasswordRequired, YouBlockedUser, PhoneCodeInvalid, UsernameInvalid, UsernameNotOccupied, UsersTooMuch, ChannelsTooMuch, BotResponseTimeout
 from pyrogram.errors.exceptions.forbidden_403 import ChatSendPollForbidden
 from time import sleep
 from requests.exceptions import ConnectionError
@@ -153,7 +149,7 @@ def waitforcoin(sec):
 #     client.request_callback_answer(channel_username, message_id, callback_data)
 
 
-def visit_sites():
+def visit_sites(client, channel_username):
     print(f"{bold}=========================={reset}")
     print(f"        {B_r}Vist Site{reset}")
     print(f"{bold}=========================={reset}")
@@ -179,10 +175,10 @@ def visit_sites():
                 if res.find("Just a moment...") != -1:
                     # client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
                     print(res.text, f"\n\n{r}Fix{reset}")
-                elif res.find('class="g-recaptcha"') != -1:
-                    print(f"{r}Skip! This Website has Captcha!{reset}")
-                    client.request_callback_answer(
-                        channel_username, message_id, callback_data_SkipButton)
+                #elif res.find('class="g-recaptcha"') != -1:
+#                    print(f"{r}Skip! This Website has Captcha!{reset}")
+#                    client.request_callback_answer(
+#                        channel_username, message_id, callback_data_SkipButton)
                 elif res.find('class="container-fluid"') != -1:
                     try:
                         data = re.findall(
@@ -211,7 +207,7 @@ def visit_sites():
             client.send_message(channel_username, "🖥 Visit sites")
 
 
-def message_bots():
+def message_bots(client, channel_username):
     print(f"{bold}=========================={reset}")
     print(f"        {B_r}Message Bot{reset}")
     print(f"{bold}=========================={reset}")
@@ -262,7 +258,7 @@ def message_bots():
             continue
 
 
-def join_chats():
+def join_chats(client, channel_username):
     print(f"\n{bold}=========================={reset}")
     print(f"        {B_r}Join Chats{reset}")
     print(f"{bold}=========================={reset}")
@@ -305,7 +301,7 @@ def join_chats():
                             sleep(1)
                         print('\r', end='')
                         continue
-                    except (UsernameInvalid, UsernameNot0ccupied):
+                    except (UsernameInvalid, UsernameNotOccupied):
                         print(f"{r}This username is invalid. Skip!{reset}")
                         client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
                         continue
@@ -339,10 +335,8 @@ def join_chats():
 
 
 def start():
-    global channel_username
     result = menu_crytoCoin()
-    channel_username = result[0]
-    f = result[1]
+    channel_username, f = result
     for i, client in enumerate(clients):
         me = client.get_me()
         print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
@@ -351,7 +345,7 @@ def start():
         check_InOrderToUseThisBot(channel_username)
         funcs = {'v': [visit_sites], 'm': [message_bots], 'j': [join_chats], 'a': [visit_sites, message_bots, join_chats]}
         for func in funcs[f]:
-       	    func()
+       	    func(client, channel_username)
     print("\n\n")
 
 
@@ -443,27 +437,29 @@ os.system('cls' if os.name == 'nt' else 'clear')
 
 main_menu = {"1": start, "2": leave, "3": add,
              "4": delete, "5": check_acc, "6": Quit}
-banner1 = """
-████████╗ █████╗ ███████╗         
-╚══██╔══╝██╔══██╗██╔════╝         
-   ██║   ███████║█████╗           
+banner1 = f"""
+{bold}{r}████████╗ █████╗ ███████╗     
+{reset}╚══██╔══╝██╔══██╗██╔════╝         
+   {b}██║   ███████║█████╗ {reset}          
    ██║   ██╔══██║██╔══╝           
-   ██║   ██║  ██║███████╗██╗██╗██╗
-   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝╚═╝
+   {r}██║   ██║  ██║███████╗██╗██╗██╗
+   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝╚═╝{reset}
                                   """
-banner2 = """
-╔╦╗╔═╗╔═╗   
- ║ ╠═╣║╣    
- ╩ ╩ ╩╚═╝ooo"""
+banner2 = f"""{bold}
+{r}╔╦╗╔═╗╔═╗ {reset}   
+ {b}║ ╠═╣║╣ {reset}   
+ ╩ ╩ ╩╚═╝ooo{reset}"""
 banner3 = f"""
-_/_/_/_/_/         _/_/        _/_/_/_/                  
-   _/           _/    _/      _/                         
-  _/           _/_/_/_/      _/_/_/                      
- _/           _/    _/      _/                           
-_/           _/    _/      _/_/_/_/       _/   _/   _/ """
+ {r} _________    ______   
+ /_  __/   |  / ____/{reset}   
+  / / / /| | / __/      
+ {b}/ / / ___ |/ /____ _ _{reset} 
+/_/ /_/  |_/_____(_|_|_)
+                        
+"""
 
 banner = random.choice([banner1, banner2, banner3])
-print(f"{b}{banner}{reset}\n")
+print(banner)
 print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}! You can choose the functions below!")
 menu_Chossed = menu()
@@ -471,8 +467,4 @@ while menu_Chossed[1]:
     main_menu[menu_Chossed[0]]()
     menu_Chossed = menu()
 
-"""
-pyrogram.errors.exceptions.bad_request_400.  UsernameNot0ccupied: [400 USERNAME_NOT_OCCUPIED]: The username is not occupied by any one (caused by "contacts.ResolveUsername")
-Error pyrogram.errors.exceptions.bad_request_400.UsernameInvalid: [400 USERNAME_INVALID]: The username is invalid (caused by "contacts.ResolveUsername")
-Photo in phone
-"""
+PhotPhoto in phone
