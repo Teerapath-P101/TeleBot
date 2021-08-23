@@ -1,4 +1,8 @@
-import os, datetime, re, json, random
+import os
+import datetime
+import re
+import json
+import random
 from cfproxy import CFProxy
 from typing import NamedTuple
 
@@ -296,14 +300,14 @@ def join_chats(client, channel_username):
                     except FloodWait:
                         for t in range(280, 0, -1):
                             print("\r", end="")
-                            print(
-                                f'{bold}A wait of {t} seconds is required (caused by "channels.JoinChannel"){reset}', end="")
+                            print(f'{bold}A wait of {t} seconds is required (caused by "channels.JoinChannel"){reset}', end="")
                             sleep(1)
                         print('\r', end='')
                         continue
                     except (UsernameInvalid, UsernameNotOccupied):
                         print(f"{r}This username is invalid. Skip!{reset}")
-                        client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                        client.request_callback_answer(
+                            channel_username, message_id, callback_data_SkipButton)
                         continue
                     except ChannelsTooMuch:
                         print(f"{r}Skip! This group is full.{reset}")
@@ -311,24 +315,25 @@ def join_chats(client, channel_username):
                         continue
                     except BotResponseTimeout:
                         print(f"{r}Skip! Servers of this group are low.{reset}")
-                        client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                        try:
+                            client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                        except:
+                            sleep(3)
+                            client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
                     except UsersTooMuch:
-                        print(f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use {bold}'Leave Channel' function {reset}")
+                        print(
+                            f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use {bold}'Leave Channel' function {reset}")
                         break
-                    client.request_callback_answer(
-                        channel_username, message_id, callback_data_JoinedButton)
-                    message = client.get_history(channel_username, limit=1)[0]
+                    sleep(1)
+                    client.request_callback_answer(channel_username, message_id, callback_data_JoinedButton)
                     sleep(2)
-                    if message.text.find("Sorry,") != -1:
-                        continue
-                    elif message.text.find("Success! 👍") != -1:
-                        reward = "\n".join(client.get_history(
-                            channel_username, limit=1)[0].text.split('\n')[1:])
+                    message = client.get_history(channel_username, limit=1)[0]
+                    if message.text.find("Success! 👍") != -1:
+                        reward = message.text.split('\n')[1:]
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
                         client.send_message(channel_username, "📣 Join chats")
-                    else:
-                        reward = '\n'.join(
-                            (client.get_history(channel_username, limit=2)[1].text.split('\n')[1:]))
+                    elif message.text.find("WARNING") != -1:
+                        reward = '\n'.join((client.get_history(channel_username, limit=2)[1].text.split('\n')[1:]))
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
         except ConnectionError:
             pass
@@ -343,7 +348,8 @@ def start():
         print(
             f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
         check_InOrderToUseThisBot(channel_username)
-        funcs = {'v': [visit_sites], 'm': [message_bots], 'j': [join_chats], 'a': [visit_sites, message_bots, join_chats]}
+        funcs = {'v': [visit_sites], 'm': [message_bots], 'j': [
+            join_chats], 'a': [visit_sites, message_bots, join_chats]}
         for func in funcs[f]:
        	    func(client, channel_username)
     print("\n\n")
@@ -371,7 +377,7 @@ def leave():
                     continue
             except:
                 pass
-        print(f"\n{y}[{g}✓{y}] Leave Successfully!{reset}")
+        print(f"\n{y}[{g}✓{y}] Leave Successful!{reset}")
         print(f"{bold}{underline}Total Channel: {amount}{reset}")
         print('------------------------------------------\n\n')
 
@@ -383,31 +389,29 @@ def add():
     if sure == "y":
         cli = CreateClient(new_client=True)
         me = cli.get_me()
-        print(
-            f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
+        print(f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
         clients.append(cli)
-        phone_session = json.load(
-            open('.phone_numbers_and_session_string.json', 'r'))
-
-    elif menu_Chossed[0] == '5':
-        print(bold+"There are", len(clients))
-        for cli in clients:
-            me = cli.get_me()
-            print(
-                f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
-
+        phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
 
 def delete():
-	pass
-
+    global phone_session
+    phone_keys = list(phone_session)
+    if len(phone_keys) == 1: print(f"{bold}{underline}Warning!{reset} You have only 1 account.\n")
+    for i, cli in enumerate(clients):
+        me = cli.get_me()
+        print(f"{i+1}) {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+    k = int(input("Enter your choice to delete"))-1
+    while not phone_session.get(phone_keys[k]):
+        print(f"{r}Invaild! Please try again{reset}")
+        k = int(input("Enter your choice to delete"))-1
+    del phone_session[phone_keys[k]], clients[k]
+    print(f"{g}{bold}Delete Success!{reset}")
 
 def check_acc():
     print(bold+"There are", len(clients))
     for cli in clients:
         me = cli.get_me()
-        print(
-            f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
-
+        print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
 
 def Quit():
 	try:
@@ -445,11 +449,7 @@ banner1 = f"""
    {r}██║   ██║  ██║███████╗██╗██╗██╗
    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝╚═╝{reset}
                                   """
-banner2 = f"""{bold}
-{r}╔╦╗╔═╗╔═╗ {reset}   
- {b}║ ╠═╣║╣ {reset}   
- ╩ ╩ ╩╚═╝ooo{reset}"""
-banner3 = f"""
+banner2 = f"""
  {r} _________    ______   
  /_  __/   |  / ____/{reset}   
   / / / /| | / __/      
@@ -457,14 +457,14 @@ banner3 = f"""
 /_/ /_/  |_/_____(_|_|_)
                         
 """
-
-banner = random.choice([banner1, banner2, banner3])
+banner = random.choice([banner1, banner2])
 print(banner)
 print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}! You can choose the functions below!")
 menu_Chossed = menu()
 while menu_Chossed[1]:
+    print("\n\n")
     main_menu[menu_Chossed[0]]()
     menu_Chossed = menu()
 
-PhotPhoto in phone
+
