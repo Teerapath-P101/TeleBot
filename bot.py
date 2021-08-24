@@ -70,13 +70,13 @@ def menu():
 
 
 def menu_crytoCoin():
-    print("You can use (1/2/3/4/5) (v/m/j) for example: \n1 v (it means start LTC bot with only visit site)")
+    print("\nYou can use (1/2/3/4/5) (v/m/j) for example: \n1 v (it means start LTC bot with only visit site)")
     index = " "
     f = "a"
     while (not click_bot_username.get(index)
             or f not in "vmja"):
         print("\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n5) ZEC")
-        index = input("Select the Crypto coins - ").lower()
+        index = input(f"{bold}Select the Crypto coins (To exit, press Ctrl+C+Enter) - ").lower()
         if len(index) == 3 and not index.isdigit():
             i2 = index
             index = i2[0]
@@ -152,7 +152,6 @@ def waitforcoin(sec):
 # def callbackButton(message_id, callback_data):
 #     client.request_callback_answer(channel_username, message_id, callback_data)
 
-
 def visit_sites(client, channel_username):
     print(f"{bold}=========================={reset}")
     print(f"        {B_r}Vist Site{reset}")
@@ -179,7 +178,8 @@ def visit_sites(client, channel_username):
                 if res.find("Just a moment...") != -1:
                     # client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
                     print("Cloudflare :(")
-                    client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                    client.request_callback_answer(
+                        channel_username, message_id, callback_data_SkipButton)
                 #elif res.find('class="g-recaptcha"') != -1:
 #                    print(f"{r}Skip! This Website has Captcha!{reset}")
 #                    client.request_callback_answer(
@@ -197,12 +197,10 @@ def visit_sites(client, channel_username):
                     proxy.post("https://dogeclick.com/reward",
                                data={"code": code, "token": token})
                     sleep(2)
-                    message_reward = client.get_history(
-                        channel_username, limit=2)[1].text
+                    message_reward = client.get_history(channel_username, limit=2)[1].text
                     print(f"{y}[{g}✓{y}] {message_reward}{reset}")
                 else:
-                    timer = client.get_history(channel_username, limit=1)[
-                        0].text.split()[-2]
+                    timer = client.get_history(channel_username, limit=1)[0].text.split()[-2]
                     waitforcoin(int(timer))
                     sleep(2)
                     message_reward = client.get_history(
@@ -210,7 +208,6 @@ def visit_sites(client, channel_username):
                     print(f"{y}[{g}✓{y}] {message_reward}{reset}")
         except:
             client.send_message(channel_username, "🖥 Visit sites")
-
 
 def message_bots(client, channel_username):
     print(f"{bold}=========================={reset}")
@@ -236,7 +233,8 @@ def message_bots(client, channel_username):
                 res = proxy.get(url).text
                 if res.find("Just a moment...") != -1:
                     print("Cloudflare :(")
-                    client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                    client.request_callback_answer(
+                        channel_username, message_id, callback_data_SkipButton)
                 else:
                     name_bot = re.findall(
                         '<title>Telegram: Contact (.*)</title>', res)[0]
@@ -262,7 +260,6 @@ def message_bots(client, channel_username):
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
         except ConnectionError:
             continue
-
 
 def join_chats(client, channel_username):
     print(f"\n{bold}=========================={reset}")
@@ -295,40 +292,47 @@ def join_chats(client, channel_username):
                 res = proxy.get(url).text
                 if res.find("Just a moment...") != -1:
                     print("Cloudflare :(")
-                    client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                    client.request_callback_answer(
+                        channel_username, message_id, callback_data_SkipButton)
                 else:
-                    ch_name = re.findall(r'<title>Telegram: Contact (.*)</title>', res)[0]
+                    ch_name = re.findall(
+                        r'<title>Telegram: Contact (.*)</title>', res)[0]
                     try:
                         client.join_chat(ch_name)
                     except FloodWait:
                         for t in range(280, 0, -1):
                             print("\r", end="")
-                            print(f'{bold}A wait of {t} seconds is required{reset}', end="")
+                            print(
+                                f'{bold}A wait of {t} seconds is required{reset}', end="")
                             sleep(1)
                         print('\r', end='')
                         continue
                     except (UsernameInvalid, UsernameNotOccupied):
-                        print(f"{r}This username is invalid. Skip!{reset}")
+                        print(f"{bold}This username is invalid. Skip!{reset}")
                         client.request_callback_answer(
                             channel_username, message_id, callback_data_SkipButton)
                         continue
                     except ChannelsTooMuch:
-                        print(f"{r}Skip! This group is full.{reset}")
-                        client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                        print(f"{bold}Skip! This group is full.{reset}")
+                        client.request_callback_answer(
+                            channel_username, message_id, callback_data_SkipButton)
                         continue
                     except BotResponseTimeout:
-                        print(f"{r}Skip! Servers of this group are low.{reset}")
+                        print(f"{bold}Skip! Servers of this group are low.{reset}")
                         try:
-                            client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                            client.request_callback_answer(
+                                channel_username, message_id, callback_data_SkipButton)
                         except:
                             sleep(3)
-                            client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
+                            client.request_callback_answer(
+                                channel_username, message_id, callback_data_SkipButton)
                     except UsersTooMuch:
                         print(
                             f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use {bold}'Leave Channel' function {reset}")
                         break
                     sleep(1)
-                    client.request_callback_answer(channel_username, message_id, callback_data_JoinedButton)
+                    client.request_callback_answer(
+                        channel_username, message_id, callback_data_JoinedButton)
                     sleep(2)
                     message = client.get_history(channel_username, limit=1)[0]
                     if message.text.find("Success! 👍") != -1:
@@ -336,27 +340,29 @@ def join_chats(client, channel_username):
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
                         client.send_message(channel_username, "📣 Join chats")
                     elif message.text.find("WARNING") != -1:
-                        reward = '\n'.join((client.get_history(channel_username, limit=2)[1].text.split('\n')[1:]))
+                        reward = '\n'.join(
+                            (client.get_history(channel_username, limit=2)[1].text.split('\n')[1:]))
                         print(f"{y}[{g}✓{y}] {reward}{reset}")
         except ConnectionError:
             pass
 
-
 def start():
-    result = menu_crytoCoin()
-    channel_username, f = result
-    for i, client in enumerate(clients):
-        me = client.get_me()
-        print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
-        print(
-            f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
-        check_InOrderToUseThisBot(channel_username)
-        funcs = {'v': [visit_sites], 'm': [message_bots], 'j': [
-            join_chats], 'a': [visit_sites, message_bots, join_chats]}
-        for func in funcs[f]:
-       	    func(client, channel_username)
-    print("\n\n")
-
+    try:
+        result = menu_crytoCoin()
+        channel_username, f = result
+        for i, client in enumerate(clients):
+            me = client.get_me()
+            print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
+            print(f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
+            check_InOrderToUseThisBot(channel_username)
+            print(f"{bold}To exit, press Ctrl+C{reset}")
+            funcs = {'v': [visit_sites], 'm': [message_bots], 'j': [
+                join_chats], 'a': [visit_sites, message_bots, join_chats]}
+            for func in funcs[f]:
+                func(client, channel_username)
+        print("\n\n")
+    except KeyboardInterrupt:
+        pass
 
 def leave():
     print(f"\n\n{bold}=========================={reset}")
@@ -365,10 +371,8 @@ def leave():
     for i, cli in enumerate(clients):
         amount = 0
         me = cli.get_me()
-        print(
-            f"\u001b[38;5;It will run all accounts! (There are {len(clients)}){reset}")
-        print(
-            f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
+        print(f"\u001b[38;5;It will run all accounts! (There are {len(clients)}){reset}")
+        print(f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w}){reset}")
         for ch in cli.get_dialogs(limit=500):
             try:
                 chat = ch.chat
@@ -384,7 +388,6 @@ def leave():
         print(f"{bold}{underline}Total Channel: {amount}{reset}")
         print('------------------------------------------\n\n')
 
-
 def add():
     global phone_session, clients
     #phone = phoneNumber()
@@ -392,29 +395,39 @@ def add():
     if sure == "y":
         cli = CreateClient(new_client=True)
         me = cli.get_me()
-        print(f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
+        print(
+            f"\n\n\n{g}{bold}Your account has now been added! ({me.first_name} {me.last_name}){reset}")
         clients.append(cli)
-        phone_session = json.load(open('.phone_numbers_and_session_string.json', 'r'))
+        phone_session = json.load(
+            open('.phone_numbers_and_session_string.json', 'r'))
 
 def delete():
     global phone_session
     phone_keys = list(phone_session)
-    if len(phone_keys) == 1: print(f"{bold}{underline}Warning!{reset} You have only 1 account.\n")
-    for i, cli in enumerate(clients):
-        me = cli.get_me()
-        print(f"{i+1}) {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
-    k = int(input("Enter your choice to delete"))-1
-    while not phone_session.get(phone_keys[k]):
-        print(f"{r}Invaild! Please try again{reset}")
-        k = int(input("Enter your choice to delete"))-1
-    del phone_session[phone_keys[k]], clients[k]
-    print(f"{g}{bold}Delete Success!{reset}")
-
+    if len(phone_keys) == 1:
+        print(f"{r}{bold}{underline}Warning! You only have 1 account, if you delete it, it will be exit.{reset}")
+    try:
+        for i, cli in enumerate(clients):
+            me = cli.get_me()
+            print(
+                f"{i+1}) {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+        k = int(input("Enter your choice to delete (To exit, press Ctrl+C+Enter) - "))-1
+        while not phone_session.get(phone_keys[k]):
+            print(f"{r}Invaild! Please try again{reset}")
+            k = int(input("Enter your choice to delete"))-1
+        clients[k].terminate()
+        del phone_session[phone_keys[k]], clients[k]
+        print(f"{g}{bold}Delete Success!{reset}")
+        if len(clients)==0: exit()
+    except KeyboardInterrupt:
+        pass
+    
 def check_acc():
     print(bold+"There are", len(clients))
     for cli in clients:
         me = cli.get_me()
-        print(f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+        print(
+            f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
 
 def Quit():
 	try:
@@ -425,13 +438,11 @@ def Quit():
 	print(f"{g}{bold}Bye Bye, See you again Thanks for using this bot :), Good luck{reset}")
 	quit()
 
-
 if phone_session == {}:
     #phone = phoneNumber()
     clients = [CreateClient(new_client=True)]
     client = clients[0]
     myself = client.get_me()
-    #phone = "+"+myself.phone_number
 else:
     clients = []
     for phone in phone_session:
@@ -466,6 +477,6 @@ print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}! You can choose the functions below!")
 menu_Chossed = menu()
 while menu_Chossed[1]:
-    print("\n\n")
+    print("\n")
     main_menu[menu_Chossed[0]]()
     menu_Chossed = menu()
