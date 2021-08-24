@@ -75,7 +75,7 @@ def menu_crytoCoin():
     f = "a"
     while (not click_bot_username.get(index)
             or f not in "vmja"):
-        print("\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n")
+        print("\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n5) ZEC")
         index = input("Select the Crypto coins - ").lower()
         if len(index) == 3 and not index.isdigit():
             i2 = index
@@ -178,7 +178,8 @@ def visit_sites(client, channel_username):
                 res = proxy.get(url).text
                 if res.find("Just a moment...") != -1:
                     # client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
-                    print(res.text, f"\n\n{r}Fix{reset}")
+                    print("Cloudflare :(")
+                    client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
                 #elif res.find('class="g-recaptcha"') != -1:
 #                    print(f"{r}Skip! This Website has Captcha!{reset}")
 #                    client.request_callback_answer(
@@ -234,7 +235,8 @@ def message_bots(client, channel_username):
                 url = message.reply_markup.inline_keyboard[0][0].url
                 res = proxy.get(url).text
                 if res.find("Just a moment...") != -1:
-                    print(res.text, f"\n\n{r}Fix{reset}")
+                    print("Cloudflare :(")
+                    client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
                 else:
                     name_bot = re.findall(
                         '<title>Telegram: Contact (.*)</title>', res)[0]
@@ -292,7 +294,8 @@ def join_chats(client, channel_username):
                 url = message.reply_markup.inline_keyboard[0][0].url
                 res = proxy.get(url).text
                 if res.find("Just a moment...") != -1:
-                    print(res.text, f"\n\n{r}Fix{reset}")
+                    print("Cloudflare :(")
+                    client.request_callback_answer(channel_username, message_id, callback_data_SkipButton)
                 else:
                     ch_name = re.findall(r'<title>Telegram: Contact (.*)</title>', res)[0]
                     try:
@@ -300,7 +303,7 @@ def join_chats(client, channel_username):
                     except FloodWait:
                         for t in range(280, 0, -1):
                             print("\r", end="")
-                            print(f'{bold}A wait of {t} seconds is required (caused by "channels.JoinChannel"){reset}', end="")
+                            print(f'{bold}A wait of {t} seconds is required{reset}', end="")
                             sleep(1)
                         print('\r', end='')
                         continue
@@ -466,5 +469,3 @@ while menu_Chossed[1]:
     print("\n\n")
     main_menu[menu_Chossed[0]]()
     menu_Chossed = menu()
-
-
