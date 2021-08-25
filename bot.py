@@ -2,7 +2,6 @@ import os
 import datetime
 import re
 import json
-import random
 from cfproxy import CFProxy
 from typing import NamedTuple
 
@@ -455,7 +454,7 @@ os.system('cls' if os.name == 'nt' else 'clear')
 
 main_menu = {"1": start, "2": leave, "3": add,
              "4": delete, "5": check_acc, "6": Quit}
-banner1 = f"""
+banner = f"""
 {bold}{r}████████╗ █████╗ ███████╗     
 {reset}╚══██╔══╝██╔══██╗██╔════╝         
    {b}██║   ███████║█████╗ {reset}          
@@ -463,15 +462,6 @@ banner1 = f"""
    {r}██║   ██║  ██║███████╗██╗██╗██╗
    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝╚═╝{reset}
                                   """
-banner2 = f"""
- {r} _________    ______   
- /_  __/   |  / ____/{reset}   
-  / / / /| | / __/      
- {b}/ / / ___ |/ /____ _ _{reset} 
-/_/ /_/  |_/_____(_|_|_)
-                        
-"""
-banner = random.choice([banner1, banner2])
 print(banner)
 print('-------------------------------------------')
 print(f"{bold}Welcome to Tele-Bot {myself.first_name}! You can choose the functions below!")
