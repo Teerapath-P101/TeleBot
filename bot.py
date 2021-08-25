@@ -76,7 +76,7 @@ def menu_crytoCoin():
     while (not click_bot_username.get(index)
             or f not in "vmja"):
         print("\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n5) ZEC")
-        index = input(f"{bold}Select the Crypto coins (To exit, press Ctrl+C+Enter) - ").lower()
+        index = input(f"{bold}Select the Crypto coins (To back, press Ctrl+C+Enter) - ").lower()
         if len(index) == 3 and not index.isdigit():
             i2 = index
             index = i2[0]
@@ -424,10 +424,10 @@ def delete():
     
 def check_acc():
     print(bold+"There are", len(clients))
-    for cli in clients:
+    for i, cli in enumerate(clients):
         me = cli.get_me()
         print(
-            f"    {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
+            f"   {i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone_number}{w})")
 
 def Quit():
 	try:
