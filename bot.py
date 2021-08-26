@@ -75,7 +75,7 @@ def menu_crytoCoin():
     while (not click_bot_username.get(index)
             or f not in "vmja"):
         print("\n1) LTC\n2) BTC\n3) Doge\n4) BCH\n5) ZEC")
-        index = input(f"{bold}Select the Crypto coins (To back, press Ctrl+C+Enter) - ").lower()
+        index = input(f"{bold}Select the Crypto coins (To back, press Ctrl+C+Enter) - ").lower().strip()
         if len(index) == 3 and not index.isdigit():
             i2 = index
             index = i2[0]
