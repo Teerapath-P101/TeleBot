@@ -299,10 +299,10 @@ def join_chats(client, channel_username):
                     try:
                         client.join_chat(ch_name)
                     except FloodWait:
-                        for t in range(280, 0, -1):
+                        for t in range(3600, 0, -1):
                             print("\r", end="")
                             print(
-                                f'{bold}A wait of {t} seconds is required{reset}', end="")
+                                f'{bold}A wait of {t} seconds(1 hour) is required{reset}', end="")
                             sleep(1)
                         print('\r', end='')
                         continue
