@@ -265,19 +265,13 @@ def join_chats(client, channel_username):
     print(f"        {B_r}Join Chats{reset}")
     print(f"{bold}=========================={reset}")
     client.send_message(channel_username, "📣 Join chats")
-    a = 0
     for _ in range(50):
         sleep(2)
         message = client.get_history(channel_username, limit=1)[0]
         try:
             if message.text.find("Sorry,") != -1:
-                if a == 2:
-                    print(f"{bold}Sorry, there are no new ads available.{reset}\n")
-                    break
-                else:
-                    client.send_message(channel_username, "📣 Join chats")
-                    sleep(2)
-                    message = client.get_history(channel_username, limit=1)[0]
+                print(f"{bold}Sorry, there are no new ads available.{reset}\n")
+                break
             else:
                 if message.text == "Choose the reason you are reporting this ad below:":
                     client.send_message(channel_username, "❌ Cancel")
@@ -299,10 +293,10 @@ def join_chats(client, channel_username):
                     try:
                         client.join_chat(ch_name)
                     except FloodWait:
-                        for t in range(3600, 0, -1):
+                        for t in range(300, 0, -1):
                             print("\r", end="")
                             print(
-                                f'{bold}A wait of {t} seconds(1 hour) is required{reset}', end="")
+                                f'{bold}A wait of {t} seconds(5 minutes) is required{reset}', end="")
                             sleep(1)
                         print('\r', end='')
                         continue
