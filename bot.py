@@ -1,6 +1,8 @@
 from telethon import TelegramClient, client, sync
 from telethon.sessions import StringSession
 from telethon.tl.functions.channels import JoinChannelRequest, LeaveChannelRequest
+from telethon.errors import BotResponseTimeoutError
+from telethon.errors.rpcerrorlist import UsersTooMuchError, FloodWaitError, ChannelsTooMuchError
 from time import sleep
 import os, datetime, json
 
@@ -45,20 +47,20 @@ def menu_crytoCoin():
     i = input().lower().split(" ")
     c = i[0]
     fs = i[1:] if len(i)>1 else ["v", "m", "j"]
-    f_list = [funcs.get(i) for i in fs]
+    f_list = [i in "vmj" for i in fs] # For check them is not in 'funcs'
     while not bot_username.get(c) or not all(f_list):
         print(f"{r}{underline}Input invalid!{reset} Please enter again.")
         i = input(f"{bold}Enter your choice - {reset}").lower().split(" ")
         c = i[0]
         fs = i[1:] if len(i)>1 else ["v", "m", "j"]
-        f_list = [funcs.get(i) for i in fs]
+        f_list = [i in "vmj" for i in fs]
     try:
         client.send_message(bot_username, "/start")
     except YouBlockedUser:
         print(
             f"! {r}{bold}{underline}You have been banned... Please use another Crypto coin.{reset}")
         return menu_crytoCoin()  # if it is banned
-    return bot_username, f
+    return bot_username, fs
 
 def create_acc(new_client=False):
     global phone_session
@@ -73,7 +75,8 @@ def create_acc(new_client=False):
         client = TelegramClient(StringSession(str_sess), api_id, api_hash)
         client.start()
     return client
-
+def check_InOrderToUseThisBot(channel_entity):
+    pass
 def waitforcoin(sec):
     for i in range(sec, 0, -1):
         print("\r", end="")
@@ -81,8 +84,100 @@ def waitforcoin(sec):
         sleep(1)
     print(f'{reset}\r', end='')
 
+def visit_site(client, channel_entity):
+    print(f"{bold}=========================={reset}")
+    print(f"        {B_r}Vist Site{reset}")
+    print(f"{bold}=========================={reset}")
+    client.send_message(channel_username, "🖥 Visit sites")
+def message_bots(client, channel_entity):
+    print(f"{bold}=========================={reset}")
+    print(f"        {B_r}Message Bot{reset}")
+    print(f"{bold}=========================={reset}")
+    client.send_message(channel_username, "🤖 Message bots")
+def join_chats(client, channel_entity):
+    print(f"\n{bold}=========================={reset}")
+    print(f"        {B_r}Join Chats{reset}")
+    print(f"{bold}=========================={reset}")
+    client.send_message(channel_username, "📣 Join chats")
+    for _ in range(40):
+            sleep(2)
+            message = client.get_messages(channel_entity.username)[0]
+            try:
+                if message.message.find('Sorry,') != -1:
+                    print("Sorry, that task is no longer valid.")
+                    break
+                else:
+                    url = mess.reply_markup.rows[0].buttons[0].url
+                    res = s.get(
+                        url,
+                        headers=user,
+                        timeout=10,
+                        allow_redirects=True
+                    ).text
+                    if res.find("Just a moment...") != -1:
+                        print("Cloudflare :(")
+                        client(GetBotCallbackAnswerRequest(peer=channel_entity.username, msg_id=_id, data=mess.reply_markup.rows[1].buttons[1].data))
+                    else:
+                        _id = message.id
+                        ch_name = re.findall(r'<title>Telegram: Contact (.*)</title>', res)[0]
+                        try:
+                            chat_entity = client.get_entity(ch_name)
+                        except:
+                            print(
+                                f"{r}Skip! There is no Telegram account with this username.{reset}")
+                            client(GetBotCallbackAnswerRequest(peer=channel_entity.username, msg_id=_id, data=mess.reply_markup.rows[1].buttons[1].data))
+                            continue
+                        try:
+                            client(JoinChannelRequest(chat_entity.username))
+                        except UsersTooMuchError:
+                            print(f"{r}Skip! This group is full.{reset}")
+                            client(GetBotCallbackAnswerRequest(peer=channel_entity.username, msg_id=_id, data=mess.reply_markup.rows[1].buttons[1].data))
+                            continue
+                        except BotResponseTimeoutError:
+                            print(f"{r}Skip! Servers of this group are low.{reset}")
+                            client(GetBotCallbackAnswerRequest(peer=channel_entity.username, msg_id=_id, data=mess.reply_markup.rows[1].buttons[1].data))
+                        except FloodWaitError:
+                            print("FloodWait...")
+                            break
+                        except ChannelsTooMuchError:
+                            print(
+                                f"{r}Join Error!{reset}\nYou are a member of too many channel! Please use {bold}'Leave Channel' function {reset}")
+                            break
+                        sleep(2)
+                        client(
+                            GetBotCallbackAnswerRequest(
+                                peer=channel_entity.username,
+                                msg_id=_id,
+                                data=mess.reply_markup.rows[0].buttons[1].data
+                            )
+                        )
+                        sleep(1)
+                        mess = client.get_messages(channel_entity.username)[0]
+                        if mess.message,find('Sorry,') != -1:
+                            client.send_message(channel_entity.username, "/join")
+                        elif mess.message.find("Success! 👍") != -1:
+                            post = mess.message.split('\n')[1:]
+                            print(f"{y}[{g}✓{y}] {post}{reset}")
+                        elif message.text.find("WARNING") != -1:
+                            post = '\n'.join((client.get_messages(channel_entity.username, limit=2)[1].message.split('\n')[1:]))
+                            print(f"{y}[{g}✓{y}] {post}{reset}")
+
 def Start():
-    pass
+    try:
+        bot_chossed, fs = menu_crytoCoin()
+        channel_entity = client.get_entity(bot_username[bot_chossed])
+        for i, client in enumerate(clients):
+            me = client.get_me()
+            print(f"{bold}It will run all accounts! (There are {len(clients)}){reset}")
+            print(f"\n{bold}{i+1}. {cyan}{me.first_name} {me.last_name} {w}({cyan}+{me.phone}{w}){reset}")
+            check_InOrderToUseThisBot(channel_entity)
+            print(f"{bold}To exit, press Ctrl+C{reset}")
+            funcs = {"v":visit_site,"m":message_bots,"j":join_chats}
+            for func in fs:
+                funcs[func](client, channel_entity)
+        print("\n\n")
+    except KeyboardInterrupt:
+        pass
 def leave():
     print(f"\n\n{bold}=========================={reset}")
     print(f"      {B_b}Leave Channel{reset}")
@@ -143,12 +238,7 @@ def Quit():
         client.disconnect()
     print(f"{g}{bold}Bye, See you again Thanks for using this bot :){reset}")
     exit()
-def visit_site():
-    pass
-def message_bots():
-    pass
-def join_chats():
-    pass
+
 api_id = 5330210
 api_hash = "a112ebb70ccee839801ef08744372fff"
 try:
@@ -166,7 +256,6 @@ try:
     os.system('cls' if os.name == 'nt' else 'clear')
     main_menu = {"1": Start, "2": leave, "3": add,
                 "4": delete, "5": check, "6": Quit}
-    fucns = {"v":visit_site,"m":message_bots,"j":join_chats}
     banner = f"""
 {bold}{r}████████╗ █████╗ ███████╗     
 {reset}╚══██╔══╝██╔══██╗██╔════╝         
