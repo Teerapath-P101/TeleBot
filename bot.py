@@ -38,8 +38,28 @@ def menu():
     f = input("Enter your choice - ")
     while not main_menu.get(f):
         print(f"{r}{underline}Input invalid!{reset} Please enter again.")
-        f = input("Enter your choice - ")
+        f = input(f"{bold}Enter your choice - {reset}")
     return f, True
+def menu_crytoCoin():
+    print("\nYou can use (1/2/3/4/5) (v/m/j) for example: \n1 v (it means start LTC bot with only visit site)")
+    i = input().lower().split(" ")
+    c = i[0]
+    fs = i[1:] if len(i)>1 else ["v", "m", "j"]
+    f_list = [funcs.get(i) for i in fs]
+    while not bot_username.get(c) or not all(f_list):
+        print(f"{r}{underline}Input invalid!{reset} Please enter again.")
+        i = input(f"{bold}Enter your choice - {reset}").lower().split(" ")
+        c = i[0]
+        fs = i[1:] if len(i)>1 else ["v", "m", "j"]
+        f_list = [funcs.get(i) for i in fs]
+    try:
+        client.send_message(bot_username, "/start")
+    except YouBlockedUser:
+        print(
+            f"! {r}{bold}{underline}You have been banned... Please use another Crypto coin.{reset}")
+        return menu_crytoCoin()  # if it is banned
+    return bot_username, f
+
 def create_acc(new_client=False):
     global phone_session
     if new_client:
@@ -123,7 +143,12 @@ def Quit():
         client.disconnect()
     print(f"{g}{bold}Bye, See you again Thanks for using this bot :){reset}")
     exit()
-
+def visit_site():
+    pass
+def message_bots():
+    pass
+def join_chats():
+    pass
 api_id = 5330210
 api_hash = "a112ebb70ccee839801ef08744372fff"
 try:
@@ -141,6 +166,7 @@ try:
     os.system('cls' if os.name == 'nt' else 'clear')
     main_menu = {"1": Start, "2": leave, "3": add,
                 "4": delete, "5": check, "6": Quit}
+    fucns = {"v":visit_site,"m":message_bots,"j":join_chats}
     banner = f"""
 {bold}{r}████████╗ █████╗ ███████╗     
 {reset}╚══██╔══╝██╔══██╗██╔════╝         
@@ -150,7 +176,7 @@ try:
    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝╚═╝{reset}
                                     """
     print(banner)
-    print(me)
+    # print(me)
     m = menu()
     while m[1]:
         print("\n")
